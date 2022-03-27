@@ -2,7 +2,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:14
-    container_name: runners-heroes-db
+    container_name: runners-heroes-database
     ports:
       - 5432:5432
     env_file:
@@ -12,4 +12,4 @@ services:
 
 volumes:
   postgres:
-    name: runners-heroes-db
+    name: runners-heroes-database
