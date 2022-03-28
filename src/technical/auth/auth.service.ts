@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { compare } from 'bcrypt';
+import { compare, hash } from 'bcrypt';
 import { UsersService } from 'src/users/users.service';
 import SigninDto from './dto/signin.dto';
+import SignupDto from './dto/signup.dto';
 
 @Injectable()
 export class AuthService {
@@ -31,6 +32,24 @@ export class AuthService {
     const payload = { email: user.email, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
+    };
+  }
+
+  async signup(data: SignupDto): Promise<any> {
+    const user = await this.usersService.findOne(data.email);
+    if (user) {
+      throw new BadRequestException('This email is already use');
+    }
+
+    data.password = await hash(data.password, 10);
+
+    const createdUser = await this.usersService.createOne(data);
+
+    const token = await this.generateJwtToken(createdUser);
+
+    return {
+      ...token,
+      userId: createdUser.id,
     };
   }
 }
