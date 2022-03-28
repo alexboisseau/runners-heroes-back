@@ -9,7 +9,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('/signin')
   async signin(@Request() req) {
-    return this.authService.signin(req.user);
+    return this.authService.generateJwtToken(req.user);
   }
 
   @Post('/signup')
