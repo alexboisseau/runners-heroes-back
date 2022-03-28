@@ -1,24 +1,35 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { User } from '@prisma/client';
 import { compare } from 'bcrypt';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findOne(email);
-
     if (!user) {
-      throw new NotFoundException('No user found for this email.');
+      return null;
     }
 
-    const passwordIsValid = await compare(user.password, pass);
+    const passwordIsValid = await compare(pass, user.password);
     if (!passwordIsValid) {
-      throw new NotFoundException('Invalid password');
+      return null;
     }
 
     const { password, ...result } = user;
-    return result;
+    return result as User;
+  }
+
+  async signin(user: User) {
+    const payload = { email: user.email, sub: user.id };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 }
