@@ -3,8 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
 import { UsersService } from 'src/users/users.service';
-import { InputSigninDto } from './dto/signin.dto';
-import { InputSignupDto } from './dto/signup.dto';
+import { InputSigninDto } from './dto/sign-in.dto';
+import { InputSignupDto } from './dto/sign-up.dto';
 import { Token } from './types/token.type';
 
 @Injectable()
