@@ -28,8 +28,15 @@ export class RunsService {
     });
   }
 
-  update(id: number, updateRunDto: UpdateRunDto) {
-    return `This action updates a #${id} run`;
+  async update(id: string, updateRunDto: UpdateRunDto) {
+    return await this.prismaService.run.update({
+      where: {
+        id: id,
+      },
+      data: {
+        ...updateRunDto,
+      },
+    });
   }
 
   remove(id: number) {

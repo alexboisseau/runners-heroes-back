@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  NotFoundException,
 } from '@nestjs/common';
 import { RunsService } from './runs.service';
 import { CreateRunDto } from './dto/create-run.dto';
@@ -50,8 +51,16 @@ export class RunsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRunDto: UpdateRunDto) {
-    return this.runsService.update(+id, updateRunDto);
+  async update(@Param('id') id: string, @Body() updateRunDto: UpdateRunDto) {
+    try {
+      return await this.runsService.update(id, updateRunDto);
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Run to update not found');
+      } else {
+        throw error;
+      }
+    }
   }
 
   @Delete(':id')
