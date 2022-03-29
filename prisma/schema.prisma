@@ -26,10 +26,10 @@ model Run {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   duration     Int
-  kilometers   Int
-  kilocalories Int
-  description  String
-  location     String
+  meters       Int
+  kilocalories Int?
+  description  String?
+  location     String?
   type         RunType
   startedDate  DateTime
   weather      WeatherType
