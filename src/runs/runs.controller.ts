@@ -1,15 +1,34 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { RunsService } from './runs.service';
 import { CreateRunDto } from './dto/create-run.dto';
 import { UpdateRunDto } from './dto/update-run.dto';
+import { JwtAuthGuard } from 'src/technical/auth/guards/jwt-auth.guard';
 
 @Controller('runs')
+@UseGuards(JwtAuthGuard)
 export class RunsController {
   constructor(private readonly runsService: RunsService) {}
 
   @Post()
-  create(@Body() createRunDto: CreateRunDto) {
-    return this.runsService.create(createRunDto);
+  async create(@Request() req, @Body() createRunDto: CreateRunDto) {
+    const { userId } = req.user; // Injected from JwtStrategy
+    createRunDto.userId = userId;
+
+    try {
+      return await this.runsService.create(createRunDto);
+    } catch (error) {
+      throw error;
+    }
   }
 
   @Get()

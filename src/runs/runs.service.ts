@@ -1,11 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { Run } from '@prisma/client';
+import { PrismaService } from 'src/technical/prisma/prisma.service';
 import { CreateRunDto } from './dto/create-run.dto';
 import { UpdateRunDto } from './dto/update-run.dto';
 
 @Injectable()
 export class RunsService {
-  create(createRunDto: CreateRunDto) {
-    return 'This action adds a new run';
+  constructor(private readonly prismaService: PrismaService) {}
+
+  async create(createRunDto: CreateRunDto): Promise<Run> {
+    return await this.prismaService.run.create({
+      data: {
+        ...createRunDto,
+      },
+    });
   }
 
   findAll() {

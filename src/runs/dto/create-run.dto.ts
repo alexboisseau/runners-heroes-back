@@ -7,6 +7,7 @@ export class CreateRunDto {
   description?: string;
   location?: string;
   type: RunType;
-  startedDate: Date;
+  startedDate: string;
   weather: WeatherType;
+  userId: string;
 }
