@@ -41,8 +41,12 @@ export class RunsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.runsService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    try {
+      return await this.runsService.findOne(id);
+    } catch (error) {
+      throw error;
+    }
   }
 
   @Patch(':id')

@@ -20,8 +20,12 @@ export class RunsService {
     return await this.prismaService.run.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} run`;
+  async findOne(id: string) {
+    return await this.prismaService.run.findUnique({
+      where: {
+        id: id,
+      },
+    });
   }
 
   update(id: number, updateRunDto: UpdateRunDto) {
