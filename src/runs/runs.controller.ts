@@ -64,7 +64,15 @@ export class RunsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.runsService.remove(+id);
+  async remove(@Param('id') id: string) {
+    try {
+      return await this.runsService.remove(id);
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Run to delete not found');
+      } else {
+        throw error;
+      }
+    }
   }
 }

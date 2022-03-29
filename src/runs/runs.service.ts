@@ -23,15 +23,15 @@ export class RunsService {
   async findOne(id: string) {
     return await this.prismaService.run.findUnique({
       where: {
-        id: id,
+        id,
       },
     });
   }
 
-  async update(id: string, updateRunDto: UpdateRunDto) {
+  async update(id: string, updateRunDto: UpdateRunDto): Promise<Run> {
     return await this.prismaService.run.update({
       where: {
-        id: id,
+        id,
       },
       data: {
         ...updateRunDto,
@@ -39,7 +39,11 @@ export class RunsService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} run`;
+  async remove(id: string): Promise<Run> {
+    return await this.prismaService.run.delete({
+      where: {
+        id,
+      },
+    });
   }
 }
