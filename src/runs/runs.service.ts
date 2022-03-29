@@ -16,8 +16,8 @@ export class RunsService {
     });
   }
 
-  findAll() {
-    return `This action returns all runs`;
+  async findAll(): Promise<Run[]> {
+    return await this.prismaService.run.findMany();
   }
 
   findOne(id: number) {

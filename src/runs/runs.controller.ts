@@ -32,8 +32,12 @@ export class RunsController {
   }
 
   @Get()
-  findAll() {
-    return this.runsService.findAll();
+  async findAll() {
+    try {
+      return await this.runsService.findAll();
+    } catch (error) {
+      throw error;
+    }
   }
 
   @Get(':id')
