@@ -1,12 +1,20 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Token } from '../types/token.type';
 
-export interface InputSignupDto {
+export class InputSignupDto {
+  @ApiProperty()
   email: string;
+
+  @ApiProperty()
   password: string;
+
+  @ApiProperty()
   lastname: string;
+
+  @ApiProperty()
   firstname: string;
 }
 
-export interface OutputSignUpDto {
+export class OutputSignUpDto {
   token: Token;
 }
