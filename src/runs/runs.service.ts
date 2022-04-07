@@ -29,11 +29,9 @@ export class RunsService {
 
     const maxDate = new Date(minDate.getTime() + milisecondsInADay);
 
-    const {
-      _sum: { meters: metersRunByUserInCurrentInterval },
-    } = await this.findMetersRunByAUser(createRunDto.userId, minDate, maxDate);
+    const metersRunByUserForThisDay = await this.findMetersRunByAUser(createRunDto.userId, minDate, maxDate);
 
-    if (metersRunByUserInCurrentInterval > maxMetersRunByAUserForADay) {
+    if (metersRunByUserForThisDay > maxMetersRunByAUserForADay) {
       throw new BadRequestException('Maximum meters run by a user for a day is 200 000.');
     }
 
@@ -49,7 +47,7 @@ export class RunsService {
     return await this.prismaService.run.findMany();
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<Run> {
     return await this.prismaService.run.findUnique({
       where: {
         id,
@@ -57,7 +55,7 @@ export class RunsService {
     });
   }
 
-  async findMetersRunByAUser(userId: string, minDate?: Date, maxDate?: Date) {
+  async findMetersRunByAUser(userId: string, minDate?: Date, maxDate?: Date): Promise<number> {
     const runWhereInput: Prisma.RunWhereInput = {
       userId,
       ...(minDate &&
@@ -69,14 +67,16 @@ export class RunsService {
         }),
     };
 
-    console.log(runWhereInput);
-
-    return await this.prismaService.run.aggregate({
+    const {
+      _sum: { meters },
+    } = await this.prismaService.run.aggregate({
       _sum: {
         meters: true,
       },
       where: runWhereInput,
     });
+
+    return meters;
   }
 
   async update(id: string, updateRunDto: UpdateRunDto): Promise<Run> {
