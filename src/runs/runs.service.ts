@@ -1,17 +1,46 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Run } from '@prisma/client';
 import { PrismaService } from 'src/technical/prisma/prisma.service';
 import { CreateRunDto } from './dto/create-run.dto';
 import { UpdateRunDto } from './dto/update-run.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class RunsService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createRunDto: CreateRunDto): Promise<Run> {
+    /** BUSINESS RULES
+     *    - A new run can't have the property startedDate in the future
+     *    - The maximum meters run by a user for a day is 200 000 (200km)
+     */
+    const maxMetersRunByAUserForADay = 200000;
+    const milisecondsInADay = 3600 * 24 * 100;
+
+    const startedDate = new Date(parseInt(createRunDto.startedDate));
+
+    if (startedDate.getTime() > Date.now()) {
+      throw new BadRequestException("Run started date can't be in the future.");
+    }
+
+    const minDate = new Date(
+      Date.UTC(startedDate.getFullYear(), startedDate.getMonth(), startedDate.getDate(), 0, 0, 0),
+    );
+
+    const maxDate = new Date(minDate.getTime() + milisecondsInADay);
+
+    const {
+      _sum: { meters: metersRunByUserInCurrentInterval },
+    } = await this.findMetersRunByAUser(createRunDto.userId, minDate, maxDate);
+
+    if (metersRunByUserInCurrentInterval > maxMetersRunByAUserForADay) {
+      throw new BadRequestException('Maximum meters run by a user for a day is 200 000.');
+    }
+
     return await this.prismaService.run.create({
       data: {
         ...createRunDto,
+        startedDate, // In Prisma Schema, startedDate has DateTime type, however, in the Dto, he has string type (for timestamp). So we pass a property with the same fieldName (startedDate) which has a DateTime type
       },
     });
   }
@@ -25,6 +54,28 @@ export class RunsService {
       where: {
         id,
       },
+    });
+  }
+
+  async findMetersRunByAUser(userId: string, minDate?: Date, maxDate?: Date) {
+    const runWhereInput: Prisma.RunWhereInput = {
+      userId,
+      ...(minDate &&
+        maxDate && {
+          startedDate: {
+            gt: minDate,
+            lte: maxDate,
+          },
+        }),
+    };
+
+    console.log(runWhereInput);
+
+    return await this.prismaService.run.aggregate({
+      _sum: {
+        meters: true,
+      },
+      where: runWhereInput,
     });
   }
 
