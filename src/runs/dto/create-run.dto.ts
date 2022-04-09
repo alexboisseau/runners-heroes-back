@@ -56,8 +56,8 @@ export class CreateRunDto {
     description: 'Timestamp of the run date',
     nullable: false,
   })
-  @IsString()
-  startedDate: string;
+  @IsInt()
+  startedDate: Date; // Note that the ApiProperty and validator attends an integer and it's normal ! The client will sent an integer (timestamp) and a Pipe will convert this integer in a valid date
 
   @ApiProperty({
     description: 'WeatherType : SUNY / SUN_AND_CLOUD / CLOUNDY / RAINY',

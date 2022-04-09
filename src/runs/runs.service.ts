@@ -17,7 +17,7 @@ export class RunsService {
     const maxMetersRunByAUserForADay = 200000;
     const milisecondsInADay = 3600 * 24 * 100;
 
-    const startedDate = new Date(parseInt(createRunDto.startedDate));
+    const { startedDate } = createRunDto;
 
     if (startedDate.getTime() > Date.now()) {
       throw new BadRequestException("Run started date can't be in the future.");
