@@ -26,8 +26,6 @@ export class RunsController {
     const { userId } = req.user; // Injected from JwtStrategy
     createRunDto.userId = userId;
 
-    console.log('CREATE RUN DTO : ', createRunDto);
-
     try {
       return await this.runsService.create(createRunDto);
     } catch (error) {
