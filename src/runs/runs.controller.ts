@@ -15,6 +15,7 @@ import { CreateRunDto } from './dto/create-run.dto';
 import { UpdateRunDto } from './dto/update-run.dto';
 import { JwtAuthGuard } from 'src/technical/auth/guards/jwt-auth.guard';
 import RunsPipe from './pipes/runs.pipe';
+import { UserId } from 'src/users/decorators/user-id.decorator';
 
 @Controller('runs')
 @UseGuards(JwtAuthGuard)
@@ -22,8 +23,7 @@ export class RunsController {
   constructor(private readonly runsService: RunsService) {}
 
   @Post()
-  async create(@Request() req, @Body(new RunsPipe()) createRunDto: CreateRunDto) {
-    const { userId } = req.user; // Injected from JwtStrategy
+  async create(@Request() req, @Body(new RunsPipe()) createRunDto: CreateRunDto, @UserId() userId: string) {
     createRunDto.userId = userId;
 
     try {
