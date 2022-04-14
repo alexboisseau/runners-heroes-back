@@ -23,7 +23,7 @@ export class RunsController {
   constructor(private readonly runsService: RunsService) {}
 
   @Post()
-  async create(@Request() req, @Body(new RunsPipe()) createRunDto: CreateRunDto, @UserId() userId: string) {
+  async create(@Body(new RunsPipe()) createRunDto: CreateRunDto, @UserId() userId: string) {
     createRunDto.userId = userId;
 
     try {

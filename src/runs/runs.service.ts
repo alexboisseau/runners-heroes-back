@@ -15,7 +15,7 @@ export class RunsService {
      *    - The maximum meters run by a user for a day is 200 000 (200km)
      */
     const maxMetersRunByAUserForADay = 200000;
-    const milisecondsInADay = 3600 * 24 * 100;
+    const milisecondsInADay = 1000 * 3600 * 24;
 
     const { startedDate } = createRunDto;
 
@@ -75,6 +75,8 @@ export class RunsService {
       },
       where: runWhereInput,
     });
+
+    console.log(meters);
 
     return meters;
   }
