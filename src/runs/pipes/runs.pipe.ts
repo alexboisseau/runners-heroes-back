@@ -6,6 +6,9 @@ import { UpdateRunDto } from '../dto/update-run.dto';
 export default class RunsPipe implements PipeTransform<any, Promise<UpdateRunDto>> {
   async transform(value: any, metadata: ArgumentMetadata) {
     if (metadata.metatype === UpdateRunDto) {
+      if (Object.keys(value).length === 0) {
+        throw new BadRequestException('empty object');
+      }
       if (!value.startedDate) {
         return value;
       }

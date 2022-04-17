@@ -7,31 +7,24 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class RunsService {
+  /** BUSINESS RULES
+   *    - A run can't have the property startedDate in the future
+   *    - The maximum meters run by a user for a day is 200 000 (200km)
+   */
+
+  private readonly maxMetersRunByAUserForADay = 200000;
+
   constructor(private readonly prismaService: PrismaService) {}
 
+  /* Publics methods */
   async create(createRunDto: CreateRunDto): Promise<Run> {
-    /** BUSINESS RULES
-     *    - A new run can't have the property startedDate in the future
-     *    - The maximum meters run by a user for a day is 200 000 (200km)
-     */
-    const maxMetersRunByAUserForADay = 200000;
-    const milisecondsInADay = 1000 * 3600 * 24;
-
     const { startedDate } = createRunDto;
 
-    if (startedDate.getTime() > Date.now()) {
+    if (this.runIsInTheFuture(startedDate)) {
       throw new BadRequestException("Run started date can't be in the future.");
     }
 
-    const minDate = new Date(
-      Date.UTC(startedDate.getFullYear(), startedDate.getMonth(), startedDate.getDate(), 0, 0, 0),
-    );
-
-    const maxDate = new Date(minDate.getTime() + milisecondsInADay);
-
-    const metersRunByUserForThisDay = await this.findMetersRunByAUser(createRunDto.userId, minDate, maxDate);
-
-    if (metersRunByUserForThisDay > maxMetersRunByAUserForADay) {
+    if (!this.userCanAddMoreMetersForARunDay(createRunDto.userId, startedDate)) {
       throw new BadRequestException('Maximum meters run by a user for a day is 200 000.');
     }
 
@@ -55,7 +48,28 @@ export class RunsService {
     });
   }
 
-  async findMetersRunByAUser(userId: string, minDate?: Date, maxDate?: Date): Promise<number> {
+  async update(id: string, updateRunDto: UpdateRunDto): Promise<Run> {
+    return await this.prismaService.run.update({
+      where: {
+        id,
+      },
+      data: {
+        ...updateRunDto,
+      },
+    });
+  }
+
+  async remove(id: string): Promise<Run> {
+    return await this.prismaService.run.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  /* Privates methods */
+
+  private async findMetersRunByAUser(userId: string, minDate?: Date, maxDate?: Date): Promise<number> {
     const runWhereInput: Prisma.RunWhereInput = {
       userId,
       ...(minDate &&
@@ -76,27 +90,25 @@ export class RunsService {
       where: runWhereInput,
     });
 
-    console.log(meters);
-
     return meters;
   }
 
-  async update(id: string, updateRunDto: UpdateRunDto): Promise<Run> {
-    return await this.prismaService.run.update({
-      where: {
-        id,
-      },
-      data: {
-        ...updateRunDto,
-      },
-    });
+  private runIsInTheFuture(startedDate: Date): boolean {
+    if (startedDate.getTime() > Date.now()) {
+      return false;
+    }
   }
 
-  async remove(id: string): Promise<Run> {
-    return await this.prismaService.run.delete({
-      where: {
-        id,
-      },
-    });
+  private async userCanAddMoreMetersForARunDay(userId: string, startedDate: Date): Promise<boolean> {
+    const milisecondsInADay = 1000 * 3600 * 24;
+
+    const minDate = new Date(
+      Date.UTC(startedDate.getFullYear(), startedDate.getMonth(), startedDate.getDate(), 0, 0, 0),
+    );
+    const maxDate = new Date(minDate.getTime() + milisecondsInADay);
+
+    const metersRunByUserForThisDay = await this.findMetersRunByAUser(userId, minDate, maxDate);
+
+    return metersRunByUserForThisDay > this.maxMetersRunByAUserForADay ? false : true;
   }
 }
