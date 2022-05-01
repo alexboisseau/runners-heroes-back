@@ -32,6 +32,7 @@ export class RunsController {
     }
   }
 
+  @UseGuards(UserIsTheOwner)
   @Get(':id')
   async findOne(@Param('id') id: string) {
     try {
@@ -41,6 +42,7 @@ export class RunsController {
     }
   }
 
+  @UseGuards(UserIsTheOwner)
   @Patch(':id')
   async update(@Param('id') id: string, @Body(new RunsPipe()) updateRunDto: UpdateRunDto) {
     try {
