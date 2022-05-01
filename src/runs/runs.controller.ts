@@ -5,6 +5,7 @@ import { UpdateRunDto } from './dto/update-run.dto';
 import { JwtAuthGuard } from 'src/technical/auth/guards/jwt-auth.guard';
 import RunsPipe from './pipes/runs.pipe';
 import { UserId } from 'src/users/decorators/user-id.decorator';
+import UserIsTheOwner from './guards/user-is-the-owner.guard';
 
 @Controller('runs')
 @UseGuards(JwtAuthGuard)
@@ -53,6 +54,7 @@ export class RunsController {
     }
   }
 
+  @UseGuards(UserIsTheOwner)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     try {

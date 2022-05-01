@@ -67,6 +67,12 @@ export class RunsService {
     });
   }
 
+  async userIsTheOwner(id: string, userId: string): Promise<boolean> {
+    const run = await this.prismaService.run.findUnique({ where: { id } });
+
+    return run && run.userId === userId ? true : false;
+  }
+
   /* Privates methods */
 
   private async findMetersRunByAUser(userId: string, minDate?: Date, maxDate?: Date): Promise<number> {
